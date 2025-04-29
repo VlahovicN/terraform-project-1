@@ -141,3 +141,14 @@ resource "aws_s3_object" "add_html_file" {
   depends_on = [ aws_s3_bucket.html_backup ]
   content_type = "text/html"
 }
+
+
+
+resource "aws_s3_bucket_public_access_block" "allow_public" {
+  bucket = aws_s3_bucket.html_backup.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}

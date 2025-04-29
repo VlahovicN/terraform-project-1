@@ -15,5 +15,5 @@ variable "instance_type" {
 }
 
 variable "bucket_name" {
-  default = "html-backup"
+  default = "html-backup-vlahovic"
 }
