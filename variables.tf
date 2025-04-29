@@ -17,3 +17,7 @@ variable "instance_type" {
 variable "bucket_name" {
   default = "html-backup-vlahovic"
 }
+
+variable "priv_subnet_cidr" {
+  default = "10.0.2.0/24"
+}
