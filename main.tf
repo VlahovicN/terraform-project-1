@@ -87,6 +87,14 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http" {
   to_port     = 80
 }
 
+resource "aws_vpc_security_group_egress_rule" "allow_icmp" {
+  security_group_id = aws_security_group.allow_ssh_and_http.id
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port = -1
+  ip_protocol = "icmp"
+  to_port = -1
+}
+
 
 resource "aws_instance" "new_instance" {
   ami = var.ami
@@ -152,3 +160,5 @@ resource "aws_s3_bucket_public_access_block" "allow_public" {
   ignore_public_acls      = false
   restrict_public_buckets = false
 }
+
+
