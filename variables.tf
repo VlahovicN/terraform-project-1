@@ -7,7 +7,7 @@ variable "subnet_cidr" {
 }
 
 variable "ami" {
-  default = "ami-0e449927258d45bc4"
+  default = "ami-053b0d53c279acc90"
 }
 
 variable "instance_type" {
@@ -15,7 +15,7 @@ variable "instance_type" {
 }
 
 variable "bucket_name" {
-  default = "html-backup-vlahovic"
+  default = "html-backup-vlahovic-11224-vrcin"
 }
 
 variable "priv_subnet_cidr" {

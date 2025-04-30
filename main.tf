@@ -87,12 +87,10 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http" {
   to_port     = 80
 }
 
-resource "aws_vpc_security_group_egress_rule" "allow_icmp" {
+resource "aws_vpc_security_group_egress_rule" "allow_all_outbound_traffic" {
   security_group_id = aws_security_group.allow_ssh_and_http.id
   cidr_ipv4 = "0.0.0.0/0"
-  from_port = -1
-  ip_protocol = "icmp"
-  to_port = -1
+  ip_protocol = -1
 }
 
 
@@ -105,6 +103,8 @@ resource "aws_security_group_rule" "allow_icmp_from_private_subnet_SG" {
   source_security_group_id = aws_security_group.priv_subnet_sg.id
 }
 
+
+
 ###################### EC2 instance ######################
 
 resource "aws_instance" "new_instance" {
@@ -113,7 +113,7 @@ resource "aws_instance" "new_instance" {
   subnet_id = aws_subnet.pub_subnet.id
   associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.allow_ssh_and_http.id]
-  key_name = aws_key_pair.instance_ssh_key.key_name
+  key_name = aws_key_pair.instance_ssh_key.id
 
 user_data = <<-EOF
               #!/bin/bash
@@ -260,17 +260,7 @@ resource "aws_instance" "private_instance" {
   subnet_id = aws_subnet.priv_subnet.id
   vpc_security_group_ids = [aws_security_group.priv_subnet_sg.id]
   instance_type = var.instance_type
-  key_name = aws_key_pair.instance_ssh_key.key_name
-
-user_data = <<-EOF
-#!/bin/bash
-                yum update -y
-                yum install -y telnet
-                yum install -y nginx
-                echo "Hello from Nikola's PRIVATE server 🚀" > /var/www/html/index.html
-                systemctl start nginx
-                systemctl enable nginx
-                EOF
+  key_name = aws_key_pair.instance_ssh_key.id
 
 tags = {
   Name = "Private-Instance"
@@ -283,5 +273,5 @@ tags = {
 
 resource "aws_key_pair" "instance_ssh_key" {
   key_name   = "instance_access_key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCHhP2pEt/CJ7dWOitUgLnJvwLWUFjToPMI6qOfXKyTGech1ATg9siarfYFjYwJZ+sIDJCfGLyx/u8Yqa7JHNmo/jq1oOwmyVAi1vrPtLbLhs1RVHUONGNwCmoXqm2zOXBuMCHdVPSgJ6YctXBElYAc2TadPrz6/dlyPJxyf6AIgSrWtCUb2WMDOXzhDqFO5GI77UFynfSTTjSr5bt8QxGcA9KPACoRbtxUHGebHByYfDIf+Uno7WBtbrtJVuDdqG4QLbbKQ2ZDQt9kwQ5M9L5f3TSFv3b0uukcMfgK566YD3fQ3oONs8jRLfH4KkOZn87a3iUXEKDVbHQ71aTQwAf nikola@Nikola"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCZ2AQNT+9+l67CZGYNc5QhFy6J02YKYB+XRIkrYQmfef4hKbGb7Z//bWRAag+lHozc2AV+LtZ3fmYt0TOecWnFLCtWFZQrQHoQwMWWJAJXIgFS06K2xZbNAxdCbnhi8JEHUeGWlfWm0Xg0IZoUD/8SQSgYL1nbKBbklaq6InLJQw4u1c8zL9I4VHMbnO37/w3fUon6HBB0pUEd4wTdVdxU7LBvWCmysHvfV0j4U5l7JQYKT+aGUAzCKcbRlpMaTgbQT5FAUmeHa4Nla4BD4BpDpwN5CPIhHUxfG6oV3YOatPiiiWvkRW92VSdzAtKJ6RW88So/mTK/FNqfo0dlhxxx nikola@Nikola"
 }
