@@ -21,15 +21,26 @@ resource "aws_vpc" "new" {
   }
 }
 
-resource "aws_subnet" "pub_subnet" {
+resource "aws_subnet" "pub_subnet-1" {
   vpc_id     = aws_vpc.new.id
-  cidr_block = var.subnet_cidr
+  cidr_block = var.subnet1_cidr
   map_public_ip_on_launch = true
+  availability_zone = "us-east-1a"
   tags = {
-    Name = "pub_subnet"
+    Name = "pub_subnet-1"
   }
 }
 
+
+resource "aws_subnet" "pub_subnet-2" {
+  vpc_id     = aws_vpc.new.id
+  cidr_block = var.subnet2_cidr
+  map_public_ip_on_launch = true
+  availability_zone = "us-east-1b"
+  tags = {
+    Name = "pub-subnet-2"
+  }
+}
 
 resource "aws_internet_gateway" "new_gw" {
   vpc_id = aws_vpc.new.id
@@ -52,7 +63,12 @@ resource "aws_route_table" "new_rt" {
 }
 
 resource "aws_route_table_association" "a" {
-  subnet_id      = aws_subnet.pub_subnet.id
+  subnet_id      = aws_subnet.pub_subnet-1.id
+  route_table_id = aws_route_table.new_rt.id
+}
+
+resource "aws_route_table_association" "c" {
+  subnet_id      = aws_subnet.pub_subnet-2.id
   route_table_id = aws_route_table.new_rt.id
 }
 
@@ -78,13 +94,13 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
 }
 
 
-resource "aws_vpc_security_group_ingress_rule" "allow_http" {
+resource "aws_security_group_rule" "allow_http_from_ALB_SG" {
+  type = "ingress"
+  from_port = 80
+  to_port = 80
+  protocol = "TCP"
+  source_security_group_id = aws_security_group.ALB_SG.id
   security_group_id = aws_security_group.allow_ssh_and_http.id
-
-  cidr_ipv4   = "0.0.0.0/0"
-  from_port   = 80
-  ip_protocol = "tcp"
-  to_port     = 80
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_outbound_traffic" {
@@ -104,26 +120,118 @@ resource "aws_security_group_rule" "allow_icmp_from_private_subnet_SG" {
 }
 
 
+######## AUTO SCALING + ELB #####################
 
-###################### EC2 instance ######################
 
-resource "aws_instance" "new_instance" {
-  ami = var.ami
+resource "aws_launch_template" "template" {
+  image_id = var.ami
   instance_type = var.instance_type
-  subnet_id = aws_subnet.pub_subnet.id
-  associate_public_ip_address = true
-  vpc_security_group_ids = [aws_security_group.allow_ssh_and_http.id]
+  vpc_security_group_ids = [ aws_security_group.allow_ssh_and_http.id ]
   key_name = aws_key_pair.instance_ssh_key.id
-
-user_data = <<-EOF
+  user_data = base64encode(<<-EOF
               #!/bin/bash
-              yum update -y
-              yum install -y nginx
+              
+              rm -rf /var/lib/apt/lists/*
+              apt-get update --allow-releaseinfo-change -y
+              apt-get install -y nginx
+              
               echo "Hello from Nikola's Terraform Server 🚀" > /var/www/html/index.html
+              
               systemctl start nginx
               systemctl enable nginx
-              EOF
+EOF
+)
 
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "my-instance"
+    }
+  }
+}
+
+
+resource "aws_autoscaling_group" "autoscale" {
+  max_size = 3
+  min_size = 1
+  desired_capacity = 2
+  target_group_arns = [aws_lb_target_group.ALB_TG.arn]
+  launch_template {
+    id = aws_launch_template.template.id
+    version = "$Latest"
+  }
+  vpc_zone_identifier = [aws_subnet.pub_subnet-1.id, aws_subnet.pub_subnet-2.id]
+  health_check_type = "ELB"
+  health_check_grace_period = 300
+  tag {
+    key = "Name"
+    value = "my-instance"
+    propagate_at_launch = true
+  }
+}
+
+
+resource "aws_security_group" "ALB_SG" {
+  name = "ALB_SG"
+  vpc_id = aws_vpc.new.id
+  tags = {
+    Name = "ALB_SG"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_http_to_ALB" {
+  security_group_id = aws_security_group.ALB_SG.id
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port = 80
+  to_port = 80
+  ip_protocol = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_outbound_traffic_from_ALB" {
+  security_group_id = aws_security_group.ALB_SG.id
+  cidr_ipv4 = "0.0.0.0/0"
+  ip_protocol = -1
+}
+
+resource "aws_lb" "terraform-alb" {
+ load_balancer_type = "application" 
+ security_groups = [aws_security_group.ALB_SG.id]
+name = "terraform-alb"
+subnets = [aws_subnet.pub_subnet-1.id, aws_subnet.pub_subnet-2.id]
+enable_deletion_protection = true
+}
+
+
+resource "aws_lb_target_group" "ALB_TG" {
+  name = "alb-tg"
+  port = 80
+  protocol = "HTTP"
+  vpc_id = aws_vpc.new.id
+  deregistration_delay = 30
+target_type = "instance"
+
+health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "200-399"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+
+}
+}
+
+resource "aws_lb_listener" "ALB_Listener" {
+  load_balancer_arn = aws_lb.terraform-alb.arn
+  port = 80
+  protocol = "HTTP"
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.ALB_TG.arn
+  }
+  depends_on = [ aws_lb.terraform-alb ]
 }
 
 ########### S3 Bucket ###########
@@ -191,7 +299,7 @@ resource "aws_eip" "nat_eip" {
 
 resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat_eip.id
-  subnet_id = aws_subnet.pub_subnet.id
+  subnet_id = aws_subnet.pub_subnet-1.id
 
 tags = {
   Name = "My_NAT_GW"
