@@ -15,7 +15,7 @@ provider "aws" {
 }
 
 
-########### EC@-ACCESS-KEY #############
+########### EC2-ACCESS-KEY #############
 
 module "access_key" {
   source = "./modules/access_key"
