@@ -1,12 +1,12 @@
 output "private_subnet_instance_id" {
-  value = aws_instance.private_instance.id
+  value = module.ASG_and_instances.private_subnet_instance_id
 }
 
 output "private_ip_private_subnet_instance" {
-  value = aws_instance.private_instance.private_ip
+  value = module.ASG_and_instances.private_ip_private_subnet_instance
 }
 
 
 output "alb_dns_name" {
-  value = aws_lb.terraform-alb.dns_name
+  value = module.Load_Balancers.terraform-alb_dns_name
 }
