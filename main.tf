@@ -15,10 +15,14 @@ provider "aws" {
 }
 
 
+########### EC@-ACCESS-KEY #############
+
 module "access_key" {
   source = "./modules/access_key"
 }
 
+
+######### AUTOSCALING and Instances ############
 
 module "ASG_and_instances" {
   source = "./modules/ASG_and_instances"
