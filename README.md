@@ -10,10 +10,12 @@ This is a practice project I built while learning Terraform. The goal was to get
 - Adds an Application Load Balancer  
 - Creates an S3 bucket with a basic HTML file  
 - Configures Security Groups for SSH and HTTP access
+- Deploys an RDS MySQL instance in private subnets with subnet group and SG isolation
 
 ## Why I made it
 
-I'm transitioning into DevOps, and this project helped me understand how AWS resources connect and how to manage them using Terraform. Nothing fancy, just solid basics done right.
+I'm transitioning into a DevOps role, and this project helped me gain practical experience in deploying real AWS components using Terraform. It allowed me to get comfortable with modularization, resource dependencies, and managing environments declaratively.
+
 
 ## How to run
 
@@ -26,5 +28,4 @@ terraform apply
 
 ## Next steps
 
-This repo isn’t finished — I constantly improve the code and gradually add more AWS services as part of my learning process.  
-The goal is to turn this into a more complete and modular infrastructure setup over time.
+This project is not finished — I plan to keep expanding it by adding more AWS services such as ebs, efs, cloudwatch etc. 
