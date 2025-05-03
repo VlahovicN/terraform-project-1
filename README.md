@@ -22,7 +22,9 @@ I'm transitioning into a DevOps role, and this project helped me gain practical 
 Make sure AWS CLI is configured and Terraform is installed, then:
 
 terraform init
+
 terraform plan
+
 terraform apply
 
 
