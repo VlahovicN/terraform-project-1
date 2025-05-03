@@ -25,3 +25,10 @@ variable "bucket_name" {
 variable "priv_subnet_cidr" {
   default = "10.0.2.0/24"
 }
+
+
+variable "db_name" {}
+variable "username" {}
+variable "password" {
+  sensitive = true
+}

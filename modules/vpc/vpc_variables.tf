@@ -13,3 +13,7 @@ variable "subnet2_cidr" {
 variable "priv_subnet_cidr" {
   default = "10.0.2.0/24"
 }
+
+variable "priv_subnet_2_cidr" {
+  default = "10.0.4.0/24"
+}

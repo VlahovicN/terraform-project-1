@@ -33,8 +33,18 @@ resource "aws_subnet" "pub_subnet-2" {
 resource "aws_subnet" "priv_subnet" {
   vpc_id     = aws_vpc.new.id
   cidr_block = var.priv_subnet_cidr
+  availability_zone = "us-east-1a"
   tags = {
     Name = "priv_subnet"
+  }
+}
+
+resource "aws_subnet" "priv_subnet-2" {
+  vpc_id = aws_vpc.new.id
+  cidr_block = var.priv_subnet_2_cidr
+  availability_zone = "us-east-1b"
+  tags = {
+    Name = "priv_subnet_1"
   }
 }
 
@@ -92,6 +102,11 @@ resource "aws_route_table_association" "b" {
 
 resource "aws_route_table_association" "c" {
   subnet_id = aws_subnet.priv_subnet.id
+  route_table_id = aws_route_table.priv_rt.id
+}
+
+resource "aws_route_table_association" "d" {
+  subnet_id = aws_subnet.priv_subnet-2.id
   route_table_id = aws_route_table.priv_rt.id
 }
 

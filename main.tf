@@ -69,3 +69,18 @@ module "security_groups" {
   source = "./modules/security_groups"
   vpc_id = module.vpc.vpc_id
 }
+
+
+######### RDS ###########
+
+module "rds" {
+  source = "./modules/rds"
+  rds_sg = module.security_groups.rds_sg
+  db_name = var.db_name
+  username = var.username
+  password = var.password
+  db_subnets = [
+   module.vpc.priv_subnet_id,
+   module.vpc.priv_subnet_2_id
+   ]
+}
