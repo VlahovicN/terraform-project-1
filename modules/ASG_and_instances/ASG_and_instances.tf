@@ -34,6 +34,7 @@ resource "aws_autoscaling_group" "autoscale" {
   max_size = 3
   min_size = 1
   desired_capacity = 2
+  name = "my-first-asg"
   target_group_arns = var.target_group
   launch_template {
     id = aws_launch_template.template.id
