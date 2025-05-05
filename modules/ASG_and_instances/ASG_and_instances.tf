@@ -51,6 +51,15 @@ resource "aws_autoscaling_group" "autoscale" {
 }
 
 
+resource "aws_autoscaling_policy" "CPU_Policy" {
+  name = "CPU_Policy"
+  policy_type = "SimpleScaling"
+  adjustment_type = "ChangeInCapacity"
+  scaling_adjustment = 1
+  cooldown = 300
+  autoscaling_group_name = aws_autoscaling_group.autoscale.name
+}
+
 
 #############  PRIVATE INSTANCE  ###############
 
@@ -65,3 +74,4 @@ tags = {
   Name = "Private-Instance"
 }
 }
+

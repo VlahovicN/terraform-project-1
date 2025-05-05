@@ -84,3 +84,21 @@ module "rds" {
    module.vpc.priv_subnet_2_id
    ]
 }
+
+
+################ SNS #################
+
+module "sns" {
+  source = "./modules/sns"
+}
+
+
+############# CloudWatch ################
+
+module "CloudWatch" {
+  source = "./modules/cloudwatch"
+  private_instance_id = module.ASG_and_instances.private_instance_id
+  autoscaling_group = module.ASG_and_instances.autoscaling_group
+  asg_action = module.ASG_and_instances.asg_action
+  sns_action = module.sns.sns_topic_arn
+}
