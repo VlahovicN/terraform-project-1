@@ -11,6 +11,7 @@ This is a practice project I built while learning Terraform. The goal was to get
 - Creates an S3 bucket with a basic HTML file  
 - Configures Security Groups for SSH and HTTP access
 - Deploys an RDS MySQL instance in private subnets with subnet group and SG isolation
+- Adds CloudWatch Alarms with SNS notifications for CPU monitoring and auto-scaling triggers
 
 ## Why I made it
 
@@ -28,4 +29,4 @@ Make sure AWS CLI is configured and Terraform is installed, then:
 
 ## Next steps
 
-This project is not finished — I plan to keep expanding it by adding more AWS services such as ebs, efs, cloudwatch etc. 
+This project is not finished — I plan to keep expanding it by adding more AWS services.
