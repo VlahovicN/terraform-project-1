@@ -73,5 +73,35 @@ resource "aws_instance" "private_instance" {
 tags = {
   Name = "Private-Instance"
 }
+
+user_data = <<-EOF
+  #!/bin/bash
+  mkfs -t ext4 /dev/xvdh
+  mkdir /data
+  mount /dev/xvdh /data
+  echo "/dev/xvdh /data ext4 defaults,nofail 0 2" >> /etc/fstab
+EOF
+
 }
+
+
+
+######## EBS #########
+
+resource "aws_ebs_volume" "ebs_for_private_ec2" {
+  availability_zone = "us-east-1a"
+  size              = 30
+  type = "gp3"
+  tags = {
+    Name = "priv_ec2_ebs"
+  }
+}
+
+resource "aws_volume_attachment" "priv_ebs_attach" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.ebs_for_private_ec2.id
+  instance_id = aws_instance.private_instance.id
+  depends_on = [ aws_instance.private_instance, aws_ebs_volume.ebs_for_private_ec2 ]
+}
+
 
