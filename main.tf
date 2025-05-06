@@ -35,6 +35,10 @@ module "ASG_and_instances" {
   priv_subnet_sg = module.security_groups.priv_subnet_sg_id
   key_name = module.access_key.key_name
   target_group = module.Load_Balancers.target_group
+  efs_sg = module.security_groups.efs_sg
+  public_subnet_1_id = module.vpc.public_subnet_1_id
+  public_subnet_2_id = module.vpc.public_subnet_2_id
+  region = "us-east-1"
 }
 
 

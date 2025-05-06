@@ -6,19 +6,10 @@ resource "aws_launch_template" "template" {
   instance_type = var.instance_type
   vpc_security_group_ids = [var.autoscaling_sg_id]
   key_name = var.key_name
-  user_data = base64encode(<<-EOF
-              #!/bin/bash
-              
-              rm -rf /var/lib/apt/lists/*
-              apt-get update --allow-releaseinfo-change -y
-              apt-get install -y nginx
-              
-              echo "Hello from Nikola's Terraform Server 🚀" > /var/www/html/index.html
-              
-              systemctl start nginx
-              systemctl enable nginx
-EOF
-)
+  user_data = base64encode(templatefile("${path.module}/userdata.sh", {
+    efs_id = aws_efs_file_system.my_efs.id
+    region = var.region
+  }))
 
   tag_specifications {
     resource_type = "instance"
@@ -105,3 +96,24 @@ resource "aws_volume_attachment" "priv_ebs_attach" {
 }
 
 
+######### EFS ##########
+
+resource "aws_efs_file_system" "my_efs" {
+  creation_token = "my_efs"
+
+  tags = {
+    Name = "MyEFS"
+  }
+}
+
+resource "aws_efs_mount_target" "pub_subnet_1" {
+  file_system_id = aws_efs_file_system.my_efs.id
+  subnet_id      = var.public_subnet_1_id
+  security_groups = [var.efs_sg]
+}
+
+resource "aws_efs_mount_target" "pub_subnet_2" {
+  file_system_id = aws_efs_file_system.my_efs.id
+  subnet_id      = var.public_subnet_2_id
+  security_groups = [var.efs_sg]
+}

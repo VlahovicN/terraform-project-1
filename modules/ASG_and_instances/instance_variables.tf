@@ -23,3 +23,11 @@ variable "priv_subnet_sg" {}
 variable "target_group" {
   type = list(string)
 }
+
+variable "public_subnet_1_id" {}
+variable "public_subnet_2_id" {}
+
+
+variable "efs_sg" {}
+
+variable "region" {}

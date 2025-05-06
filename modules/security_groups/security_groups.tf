@@ -35,14 +35,6 @@ resource "aws_security_group_rule" "allow_http_from_ALB_SG" {
 }
 
 
-resource "aws_vpc_security_group_egress_rule" "allow_all_outbound_traffic" {
-  security_group_id = aws_security_group.autoscaling_security_group.id
-  cidr_ipv4 = "0.0.0.0/0"
-  ip_protocol = -1
-}
-
-
-
 resource "aws_security_group_rule" "allow_icmp_from_private_subnet_SG" {
   type = "ingress"
   security_group_id = aws_security_group.autoscaling_security_group.id
@@ -51,6 +43,15 @@ resource "aws_security_group_rule" "allow_icmp_from_private_subnet_SG" {
   protocol = "icmp"
   source_security_group_id = aws_security_group.priv_subnet_sg.id
 }
+
+
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_outbound_traffic" {
+  security_group_id = aws_security_group.autoscaling_security_group.id
+  cidr_ipv4 = "0.0.0.0/0"
+  ip_protocol = -1
+}
+
 
 
 ########## Private Subnet Security Group #############
@@ -161,4 +162,36 @@ resource "aws_security_group_rule" "inbound_rule_port_3306" {
   to_port = 3306
   protocol = "tcp"
   source_security_group_id = aws_security_group.priv_subnet_sg.id
+}
+
+
+
+
+######### EFS Security Group ##########
+
+resource "aws_security_group" "efs_sg" {
+  vpc_id = var.vpc_id
+  tags = {
+    Name = "efs_sg"
+  }
+}
+
+
+resource "aws_security_group_rule" "allow_efs" {
+  type = "ingress"
+  security_group_id = aws_security_group.efs_sg.id
+  source_security_group_id = aws_security_group.autoscaling_security_group.id
+  from_port   = 2049
+  protocol = "tcp"
+  to_port     = 2049
+}
+
+
+resource "aws_security_group_rule" "outbound_efs_sg" {
+  type = "egress"
+  security_group_id = aws_security_group.efs_sg.id
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
 }
