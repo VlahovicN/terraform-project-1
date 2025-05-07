@@ -4,6 +4,9 @@
 resource "aws_launch_template" "template" {
   image_id = var.ami
   instance_type = var.instance_type
+  iam_instance_profile {
+    name = var.ec2_instance_profile_name
+  }
   vpc_security_group_ids = [var.autoscaling_sg_id]
   key_name = var.key_name
   user_data = base64encode(templatefile("${path.module}/userdata.sh", {

@@ -31,3 +31,5 @@ variable "public_subnet_2_id" {}
 variable "efs_sg" {}
 
 variable "region" {}
+
+variable "ec2_instance_profile_name" {}

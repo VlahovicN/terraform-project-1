@@ -36,13 +36,14 @@ module "ASG_and_instances" {
   key_name = module.access_key.key_name
   target_group = module.Load_Balancers.target_group
   efs_sg = module.security_groups.efs_sg
+  ec2_instance_profile_name = aws_iam_instance_profile.ec2_instance_profile.name
   public_subnet_1_id = module.vpc.public_subnet_1_id
   public_subnet_2_id = module.vpc.public_subnet_2_id
   region = "us-east-1"
 }
 
 
-#########  S# BUCKETS  ##########
+#########  S3 BUCKETS  ##########
 
 module "s3_buckets" {
   source = "./modules/s3bucket"
@@ -106,3 +107,77 @@ module "CloudWatch" {
   asg_action = module.ASG_and_instances.asg_action
   sns_action = module.sns.sns_topic_arn
 }
+
+
+
+################### IAM ########################
+
+data "aws_iam_policy_document" "s3_access_and_cloudwatch_logs_policy" {
+  statement {
+    sid = "1"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+
+    resources = [module.s3_buckets.bucket_arn_with_wildcard]
+  }
+    statement {
+      sid = "2"
+    actions = [ "s3:ListBucket" ]
+     resources = [module.s3_buckets.bucket_arn]
+    }
+
+    statement {
+      sid = "3"
+      actions = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+      ]
+      resources = ["arn:aws:logs:*:*:*"]
+    }
+}
+
+
+
+
+
+resource "aws_iam_policy" "my_custom_policy" {
+  name = "my_custom_policy"
+  policy = data.aws_iam_policy_document.s3_access_and_cloudwatch_logs_policy.json
+}
+
+
+
+
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "s3_access_policy_attachment_to_ec2" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.my_custom_policy.arn
+}
+
+
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "ec2_instance_profile"
+  role = aws_iam_role.ec2_role.name
+}
+

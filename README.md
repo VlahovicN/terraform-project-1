@@ -13,6 +13,7 @@ This is a practice project I built while learning Terraform. The goal was to get
 - Deploys an RDS MySQL instance in private subnets with subnet group and SG isolation
 - Adds CloudWatch Alarms with SNS notifications for CPU monitoring and auto-scaling triggers
 - Adds EBS volume for instance in private subnet and EFS for Autoscaling group in public subnets. 
+- Defines IAM roles and policies to securely grant EC2 instances access to AWS services like CloudWatch and S3.
 
 ## Why I made it
 

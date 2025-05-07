@@ -10,3 +10,7 @@ output "private_ip_private_subnet_instance" {
 output "alb_dns_name" {
   value = module.Load_Balancers.terraform-alb_dns_name
 }
+
+output "ec2_instance_profile_name" {
+  value = aws_iam_instance_profile.ec2_instance_profile.name
+}
