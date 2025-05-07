@@ -12,7 +12,7 @@ This is a practice project I built while learning Terraform. The goal was to get
 - Configures Security Groups for SSH and HTTP access
 - Deploys an RDS MySQL instance in private subnets with subnet group and SG isolation
 - Adds CloudWatch Alarms with SNS notifications for CPU monitoring and auto-scaling triggers
-- Added EBS volume for private instance and EFS for 
+- Adds EBS volume for private instance and EFS for 
 
 ## Why I made it
 
