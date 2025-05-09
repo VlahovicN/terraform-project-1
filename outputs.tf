@@ -14,3 +14,7 @@ output "alb_dns_name" {
 output "ec2_instance_profile_name" {
   value = aws_iam_instance_profile.ec2_instance_profile.name
 }
+
+output "ec2_instance_profile_name2" {
+  value = aws_iam_instance_profile.ec2_instance_profile2.name
+}

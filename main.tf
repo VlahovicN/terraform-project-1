@@ -40,6 +40,7 @@ module "ASG_and_instances" {
   public_subnet_1_id = module.vpc.public_subnet_1_id
   public_subnet_2_id = module.vpc.public_subnet_2_id
   region = "us-east-1"
+  ec2_instance_profile2_name = aws_iam_instance_profile.ec2_instance_profile2.name
 }
 
 
@@ -112,6 +113,9 @@ module "CloudWatch" {
 
 ################### IAM ########################
 
+
+########## S3 Access and CloudWatch logs ###########
+
 data "aws_iam_policy_document" "s3_access_and_cloudwatch_logs_policy" {
   statement {
     sid = "1"
@@ -176,8 +180,83 @@ resource "aws_iam_role_policy_attachment" "s3_access_policy_attachment_to_ec2" {
 }
 
 
+
+resource "aws_iam_role_policy_attachment" "ssm_ec2_role" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cwagent_ec2_role" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_full_access" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_ssm_role" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+
+
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = "ec2_instance_profile"
   role = aws_iam_role.ec2_role.name
 }
 
+
+
+
+
+########## EC2 Role For Private Instance ############
+
+resource "aws_iam_role" "ec2_role_for_private_instance" {
+  name = "ec2-role1"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+
+resource "aws_iam_instance_profile" "ec2_instance_profile2" {
+  name = "ec2_instance_profile2"
+  role = aws_iam_role.ec2_role_for_private_instance.name
+}
+
+
+
+resource "aws_iam_role_policy_attachment" "ssm_ec2_role_private" {
+  role       = aws_iam_role.ec2_role_for_private_instance.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cwagent_ec2_role_private" {
+  role       = aws_iam_role.ec2_role_for_private_instance.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+
+resource "aws_iam_role_policy_attachment" "ssm_full_access_private" {
+  role       = aws_iam_role.ec2_role_for_private_instance.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_ssm_role_private" {
+  role       = aws_iam_role.ec2_role_for_private_instance.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}

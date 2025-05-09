@@ -4,6 +4,9 @@
 resource "aws_launch_template" "template" {
   image_id = var.ami
   instance_type = var.instance_type
+  monitoring {
+  enabled = true
+}
   iam_instance_profile {
     name = var.ec2_instance_profile_name
   }
@@ -62,19 +65,14 @@ resource "aws_instance" "private_instance" {
   subnet_id = var.priv_subnet_id
   vpc_security_group_ids = [var.priv_subnet_sg]
   instance_type = var.instance_type
+  iam_instance_profile = var.ec2_instance_profile2_name
   key_name = var.key_name
 
 tags = {
   Name = "Private-Instance"
 }
 
-user_data = <<-EOF
-  #!/bin/bash
-  mkfs -t ext4 /dev/xvdh
-  mkdir /data
-  mount /dev/xvdh /data
-  echo "/dev/xvdh /data ext4 defaults,nofail 0 2" >> /etc/fstab
-EOF
+user_data = filebase64("${path.module}/userdata1.sh")
 
 }
 

@@ -37,3 +37,111 @@ resource "aws_cloudwatch_metric_alarm" "private_instance_cpu_alarm" {
 }
 
 
+
+
+
+
+
+########### CloudWatch Dashboards #############
+
+
+resource "aws_cloudwatch_dashboard" "asg_cpu_utilization_dashboard" {
+  dashboard_name = "asg-cpu-utilization"
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type = "metric",
+        x    = 0,
+        y    = 0,
+        width  = 24,
+        height = 6,
+        properties = {
+          view     = "timeSeries",
+          stacked  = false,
+          region   = "us-east-1",
+          title    = "ASG Average CPU Utilization",
+          metrics  = [
+            [
+              "AWS/AutoScaling",
+              "CPUUtilization",
+              "AutoScalingGroupName",
+              "${var.autoscaling_group}"
+            ]
+          ],
+          period = 300,
+          stat   = "Average"
+        }
+      }
+    ]
+  })
+}
+
+
+
+resource "aws_cloudwatch_dashboard" "priv_instance_cpu_utilization_dashboard" {
+  dashboard_name = "priv_instance_cpu-utilization"
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type = "metric",
+        x    = 0,
+        y    = 0,
+        width  = 24,
+        height = 6,
+        properties = {
+          view     = "timeSeries",
+          stacked  = false,
+          region   = "us-east-1",
+          title    = "Private Instance Average CPU Utilization",
+          metrics  = [
+            [
+              "AWS/EC2",
+              "CPUUtilization",
+              "InstanceId",
+              "${var.private_instance_id}"
+            ]
+          ],
+          period = 300,
+          stat   = "Average"
+        }
+      }
+    ]
+  })
+}
+
+
+
+
+resource "aws_cloudwatch_dashboard" "priv_instance_memory_dashboard" {
+  dashboard_name = "priv_instance_memory-utilization"
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type = "metric",
+        x    = 0,
+        y    = 0,
+        width  = 24,
+        height = 6,
+        properties = {
+          view     = "timeSeries",
+          stacked  = false,
+          region   = "us-east-1",
+          title    = "Private Instance Memory Utilization",
+          metrics  = [
+            [
+              "AWS/EC2",
+              "mem_used",
+              "InstanceId",
+              "${var.private_instance_id}"
+            ]
+          ],
+          period = 300,
+          stat   = "Average"
+        }
+      }
+    ]
+  })
+}

@@ -33,3 +33,5 @@ variable "efs_sg" {}
 variable "region" {}
 
 variable "ec2_instance_profile_name" {}
+
+variable "ec2_instance_profile2_name" {}
