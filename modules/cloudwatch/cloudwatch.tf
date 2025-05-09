@@ -63,7 +63,7 @@ resource "aws_cloudwatch_dashboard" "asg_cpu_utilization_dashboard" {
           title    = "ASG Average CPU Utilization",
           metrics  = [
             [
-              "AWS/AutoScaling",
+              "AWS/EC2",
               "CPUUtilization",
               "AutoScalingGroupName",
               "${var.autoscaling_group}"
