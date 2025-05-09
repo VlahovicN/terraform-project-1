@@ -14,7 +14,8 @@ This is a practice project I built while learning Terraform. The goal was to get
 - Adds CloudWatch Alarms with SNS notifications for CPU monitoring and auto-scaling triggers
 - Adds EBS volume for instance in private subnet and EFS for Autoscaling group in public subnets. 
 - Defines IAM roles and policies to securely grant EC2 instances access to AWS services like CloudWatch and S3.
-
+- Added CloudWatch Dashboards showing CPU Utilization for ASG and private instance.
+- Enabled SSM access to all instances by using session manager.
 
 ## Why I made it
 
