@@ -17,6 +17,61 @@ This is a practice project I built while learning Terraform. The goal was to get
 - Added CloudWatch Dashboards showing CPU Utilization for ASG and private instance.
 - Enabled SSM access to all instances by using session manager.
 
+
+
+
+### VPC and Networking
+- 1 VPC
+- 2 public subnets (used for Application Load Balancer and Auto Scaling Group)
+- 2 private subnets (used for EC2 instance and RDS)
+- 1 Internet Gateway for public subnets
+- 1 NAT Gateway for private subnets
+- Route tables for both public and private traffic
+
+### Security Groups
+- Security group for Application Load Balancer (allows HTTP on port 80 from anywhere)
+- Security Group for ASG-EC2 Instances (Allows HTTP from ALB SG, SSH access from anywhere because of testing, and ICMP from priv subnets SG)
+- Security Group for EC2 instance in private subnet (allows SSH and ICMP from public subnet SG)
+- Security group for RDS (allows inbound MySQL port 3306 only from ASG EC2 security group)
+- Security group for EFS (allows NFS port 2049 only from ASG EC2 security group)
+- All Security Groups (except RDS SG) have all outbound traffic enabled. 
+
+### Compute
+Auto Scaling Group (ASG) that launches EC2 instances in public subnets:
+- Launch template with user data script to:
+  - Install NGINX and NFS
+  - Mount NFS file system
+
+EC2 instance in private subnet with userdata script which mount EBS volume
+ 
+
+### Load Balancer
+- Application Load Balancer in public subnets
+- Listener on port 80 that forwards traffic to target group (ASG EC2 instances)
+
+### Storage
+- EBS volume attached and mounted to private EC2 instance
+- EFS file system mounted on ASG EC2 instances
+- S3 bucket for storing static web content (HTML)
+
+### Database
+- RDS MySQL database deployed in private subnet
+- Access allowed only from EC2 (private subnet) security group
+
+### Monitoring
+- CloudWatch Alarm for EC2 CPU utilization (both ASG and private EC2 instance)
+- SNS Topic to send email notifications on alarm trigger
+
+### IAM
+- IAM Role for EC2 with access to:
+  - CloudWatch
+  - S3
+  - EFS
+  - SSM
+
+
+
+
 ## Why I made it
 
 I'm transitioning into a DevOps role, and this project helped me gain practical experience in deploying real AWS components using Terraform. It allowed me to get comfortable with modularization, resource dependencies, and managing environments declaratively.
