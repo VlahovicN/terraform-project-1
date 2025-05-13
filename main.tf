@@ -191,16 +191,6 @@ resource "aws_iam_role_policy_attachment" "cwagent_ec2_role" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
-resource "aws_iam_role_policy_attachment" "ssm_full_access" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "ec2_ssm_role" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-}
-
 
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
@@ -248,15 +238,4 @@ resource "aws_iam_role_policy_attachment" "ssm_ec2_role_private" {
 resource "aws_iam_role_policy_attachment" "cwagent_ec2_role_private" {
   role       = aws_iam_role.ec2_role_for_private_instance.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-}
-
-
-resource "aws_iam_role_policy_attachment" "ssm_full_access_private" {
-  role       = aws_iam_role.ec2_role_for_private_instance.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "ec2_ssm_role_private" {
-  role       = aws_iam_role.ec2_role_for_private_instance.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
 }
