@@ -17,3 +17,7 @@ output "asg_action" {
 output "private_instance_id" {
   value = aws_instance.private_instance.id
 }
+
+output "efs_id" {
+  value = aws_efs_file_system.my_efs.id
+}
