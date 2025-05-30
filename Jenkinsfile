@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         TF_WORKING_DIR = "/home/nikola/terraform-project-1"
-        ANSIBLE_DIR = "/home/nikola/ansible-project"
+        ANSIBLE_DIR = "/home/nikola/ansible_project"
     }
 
     stages {
