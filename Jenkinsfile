@@ -41,7 +41,7 @@ pipeline {
                 dir("${TF_WORKING_DIR}") {
                     script {
                         sh """
-                            EFS_ID=$(terraform output -raw efs_id)
+                            EFS_ID=\$(terraform output -raw efs_id)
                             echo "efs_id: \$EFS_ID" > ${ANSIBLE_DIR}/efs_vars.yml
                         """
                     }
