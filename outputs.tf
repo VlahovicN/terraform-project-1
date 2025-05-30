@@ -18,3 +18,7 @@ output "ec2_instance_profile_name" {
 output "ec2_instance_profile_name2" {
   value = aws_iam_instance_profile.ec2_instance_profile2.name
 }
+
+output "efs_id" {
+  value = module.ASG_and_instances.efs_id
+}
