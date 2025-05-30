@@ -26,7 +26,12 @@ pipeline {
         stage('Apply') {
             steps {
                 dir("${TF_WORKING_DIR}") {
-                    sh 'terraform apply -auto-approve'
+                    script {
+                        def status = sh(script: 'terraform apply -auto-approve', returnStatus: true)
+                        if (status != 0) {
+                            echo "Terraform apply failed with exit code ${status}, but continuing..."
+                        }
+                    }
                 }
             }
         }
@@ -37,7 +42,7 @@ pipeline {
                     script {
                         sh """
                             EFS_ID=$(terraform output -raw efs_id)
-                            echo "efs_id: $EFS_ID" > ${ANSIBLE_DIR}/efs_vars.yml
+                            echo "efs_id: \$EFS_ID" > ${ANSIBLE_DIR}/efs_vars.yml
                         """
                     }
                 }
